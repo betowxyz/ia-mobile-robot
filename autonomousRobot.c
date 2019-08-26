@@ -1,5 +1,5 @@
 // Roberto Marinheiro
-// ROBO AUTONOMO -> Pc troll fdp ;D
+// ROBO AUTONOMO
 // include
 #include <stdio.h>
 #include <stdlib.h>
