@@ -1,7 +1,7 @@
 # AutonomousRobot
 
 ### Definição do Problema
-Pesquisar por um objeto em uma área pré-conhecida pelo Robô. 
+Pesquisar por um objeto em uma área pré-conhecida pelo Robô. :shipit:
 
 ### Módulos: 
 
