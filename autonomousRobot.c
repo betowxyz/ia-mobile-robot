@@ -187,7 +187,8 @@ void raio(int x0, int y0, int x1, int y1, Mapa *mapa) { // ~BRESEHANS LINE ALGOR
     int dx = abs(x1-x0), sx = x0<x1 ? 1 : -1;
     int dy = abs(y1-y0), sy = y0<y1 ? 1 : -1;
     int err = (dx>dy ? dx : -dy)/2, e2;
-    for(;;){
+    for(;;){ // Esse loop infinito pode ser alterado por um While((x0==x1 && y0==y1)) || mapa->mapa[x0][y0]==1)
+        // E como medida de seguranca para esse loop, podemos adicionar algum "timeout", para o programa jamais travar nesse loop (apesar de ser muito improvavel)
         if(x0==x1 && y0==y1){
             break; // Fim do Raio
         }
