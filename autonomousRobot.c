@@ -16,7 +16,7 @@
 #include <stdbool.h>
 
 /*
-    HEADER EXTERNO
+    HEADERS
 */
 #include "general.h" // M0 - General
 #include "visibilidade.h" // M1 - Visibilidade
@@ -26,15 +26,15 @@
     CONSTANTES DE CONTROLE
 */
 // Guardas
-#define MAXGUARDA 100
+#define MAXGUARDA (100)
 // Ordenacao dos pontos de guarda
-#define MAXCUSTO 100000
+#define MAXCUSTO (100000)
 // Path
-#define MAXPATH 100
+#define MAXPATH (100)
 // Heap
 #define MAXHEAPSIZE (1000)
 // ClosedList
-#define MAXCLOSEDLIST 1000
+#define MAXCLOSEDLIST (1000)
 
 // INICIALIZACAO DE ESTRUTURAS
 
@@ -90,7 +90,7 @@ Mapa * initMapa(){
 */
 Visibilidade * initVisibilidade(){
     Visibilidade *visibilidade=(Visibilidade*)calloc(1,sizeof(Visibilidade));
-    visibilidade->pontos=(Ponto*)calloc(MAXGUARDA,sizeof(Ponto*)); // Numero maximo de pontos de guarda: 100
+    visibilidade->pontos=(Ponto*)calloc(MAXGUARDA,sizeof(Ponto*)); // Numero maximo de pontos de guarda: MAXGUARDA
     visibilidade->completoVisivel = 0;
     visibilidade->quantidade = -1;
 }
@@ -100,7 +100,6 @@ Visibilidade * initVisibilidade(){
 */
 Node initNode(Ponto posicao){
     Node node, parente;
-    // Setando parente como NULL (-1, -1)
     node.posicao = posicao;
     node.parente = NULL;
     node.g = 0;
@@ -114,7 +113,6 @@ Node initNode(Ponto posicao){
 */
 Node initEmptyNode(){
     Node node;
-    // Setando posicao & parente como NULL (-1, -1)
     Ponto emptyCoord = initPonto(-1, -1);
     node.posicao = emptyCoord;
     node.parente = NULL;
@@ -176,12 +174,11 @@ ListaPath * initListaPath(Visibilidade *visibilidade, Mapa *mapa){
 PriorityQueue initMaxHeap() {
     PriorityQueue H;
     H = malloc(sizeof ( struct HeapStruct));
-    /* Aloca a lista com um espaco a mais para sentinela */
-    H->Elements = malloc((MAXHEAPSIZE+1)*sizeof (Node));
+    H->Elements = malloc((MAXHEAPSIZE+1)*sizeof (Node)); // Aloca a lista com um espaco a mais para sentinela
     H->capacidade = MAXHEAPSIZE;
     H->tamanho = 0;
-    Node b = initEmptyNode();
-    H->Elements[0]= b;
+    Node emptyNode = initEmptyNode();
+    H->Elements[0]= emptyNode;
     return H;
 }
 
@@ -191,19 +188,19 @@ PriorityQueue initMaxHeap() {
     Printa o mapa
 */
 void printMapa(Mapa *mapa){
-    printf("\n\n- - - - - - - - - - - - - - MAPA - - - - - - - - - - - - - - ");
+    printf("\n- - - - - - - - - - - - - - MAPA - - - - - - - - - - - - - - ");
     int a, aa, numeroGuarda;
     for(a=0; a<mapa->altura; a++){
         printf("\n");
         for(aa=0; aa<mapa->largura; aa++){
-            if(mapa->mapa[a][aa]==0) printf("  "); // VAZIO - SEM VISAO
-            if(mapa->mapa[a][aa]==2) printf(" -"); // VAZIO - COM VISAO
-            if(mapa->mapa[a][aa]==1) printf(" #"); // OBSTACULO
-            if(mapa->mapa[a][aa]==-5) printf(" o"); // VAZIO - PARTE DA ROTA
-            if(mapa->mapa[a][aa]>9) printf(" %d", mapa->mapa[a][aa]-10); // PONTO DE GAURDA
+            if(mapa->mapa[a][aa]==0) printf("  "); // LIVRE - SEM VISAO
+            if(mapa->mapa[a][aa]==2) printf(" -"); // LIVRE - COM VISAO
+            if(mapa->mapa[a][aa]==1) printf(" #"); // CHEIO - OBSTACULO
+            if(mapa->mapa[a][aa]==-5) printf(" o"); // LIVRE - PARTE DA ROTA
+            if(mapa->mapa[a][aa]>9) printf(" %d", mapa->mapa[a][aa]-10); // LIVRE - PONTO DE GAURDA
         }
     }
-    printf("\n\nLegenda: \n' ' = espaco vazio sem visao\n'#' = espaco com obstaculo\n'-' = espaco vazio com visao\n'V' = ponto de guarda\n'o' = Rota\n");
+    printf("\n\nLegenda: \n' ' = Sem visao (Livre)\n'#' = Obstaculo\n'-' = Com Visao (Livre)\n'0-N' = Guarda (Livre)\n'o' = Rota (Livre)\n");
 }
 
 /*
@@ -310,14 +307,13 @@ bool maxHeapCheia(PriorityQueue H) {
 */
 void pushMaxHeap(PriorityQueue H, Node X) {
     int i;
-
-    if (maxHeapCheia(H)) {
-        printf("\nPriority queue is full.");
+    if(maxHeapCheia(H)){
+        printf("\nMaxHeap Cheia.");
         return;
     }
-
-    for (i = ++H->tamanho; H->Elements[ i / 2 ].f > X.f; i /= 2)
+    for (i = ++H->tamanho; H->Elements[ i / 2 ].f > X.f; i /= 2){
         H->Elements[ i ] = H->Elements[ i / 2 ];
+    }
     H->Elements[ i ] = X;
 }
 
@@ -325,33 +321,28 @@ void pushMaxHeap(PriorityQueue H, Node X) {
     Retira o menor elemento da MaxHeap e o retorna
 */
 Node popMaxHeap(PriorityQueue H) {
-    int i, Child;
-    Node MinElement, LastElement;
-
-    if (maxHeapVazia(H)) {
-        printf("\nPriority queue is empty.");
-        return H->Elements[ 0 ];
+    int i, child;
+    Node minElement, lastElement;
+    if (maxHeapVazia(H)){
+        printf("\nMaxHeap vazia.");
+        return H->Elements[0];
     }
-    MinElement = H->Elements[ 1 ];
-    LastElement = H->Elements[ H->tamanho-- ];
-
-    for (i = 1; i * 2 <= H->tamanho; i = Child) {
-        /* Find smaller child */
-        Child = i * 2;
-        if (Child != H->tamanho && H->Elements[ Child + 1 ].f < H->Elements[ Child ].f){
-            Child++;
+    minElement = H->Elements[ 1 ];
+    lastElement = H->Elements[ H->tamanho-- ];
+    for (i = 1; i * 2 <= H->tamanho; i = child) {
+        child = i * 2;
+        if (child != H->tamanho && H->Elements[ child + 1 ].f < H->Elements[ child ].f){
+            child++;
             }
-
-        /* Percolate one level */
-        if (LastElement.f > H->Elements[ Child ].f){
-            H->Elements[ i ] = H->Elements[ Child ];
+        if (lastElement.f > H->Elements[ child ].f){
+            H->Elements[ i ] = H->Elements[ child ];
         }
         else{
             break;
         }
     }
-    H->Elements[ i ] = LastElement;
-    return MinElement;
+    H->Elements[ i ] = lastElement;
+    return minElement;
 }
 
 // FUNCOES DE LIBERAMENTO DE MEMORIA
@@ -360,7 +351,6 @@ Node popMaxHeap(PriorityQueue H) {
     Libera memoria alocada para a estrutura MAPA
 */
 void liberaMapa(Mapa *mapa){
-    printf("\nLiberando memoria alocada pela estrutura Mapa...");
     int i;
     for(i=0; i<mapa->altura; i++)
         free(mapa->mapa[i]);
@@ -372,7 +362,6 @@ void liberaMapa(Mapa *mapa){
     Libera memoria alocada para a estrutura VISIBILIDADE
 */
 void liberaVisibilidade(Visibilidade *visibilidade){
-    printf("\nLiberando memoria alocada pela estrutura Visibilidade...");
     free(visibilidade->pontos);
     free(visibilidade);
 }
@@ -394,7 +383,6 @@ void liberaClosedList(ClosedList *closedList){
     Libera memoria alocada para LISTAPATH
 */
 void liberaListaPath(ListaPath *listaPath){
-    printf("\nLiberando memoria alocada pela estrutura ListaPath...");
     for(int i=0; i<listaPath->tamanho; i++){
         free(listaPath->paths[i].path);
         }
@@ -594,10 +582,8 @@ Path * aStar(Ponto inicio, Ponto objetivo, Mapa *mapa){
             }
         }
     }
-
     // Nao encontrou caminho, retorna caminho vazio
     Path *path = initPath();
-
     // Liberando Memoria Alocada no algoritmo
     liberaMaxHeap(openMaxHeap);
     liberaClosedList(closedList);
@@ -605,7 +591,7 @@ Path * aStar(Ponto inicio, Ponto objetivo, Mapa *mapa){
 }
 
 /*
-    Funcao Robot
+    Funcao Principal
 */
 int main(){
     // Iniciailizando estruturas
