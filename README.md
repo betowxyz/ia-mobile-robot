@@ -1,7 +1,7 @@
 # MOBILE SEARCH ROBOT :shipit:
 
 ### Definição do Problema
-Pesquisar por um objeto em uma área pré-conhecida pelo Robô.
+Pesquisar por um objeto em uma área conhecida pelo Robô.
 
 ### Módulos: 
 
@@ -12,7 +12,4 @@ Disparando raio para todas as direções e seleciona novos pontos de guarda, at�
 Faz o planejamento de rota para todos os pontos de maneira eficiente.
 
 #### Machine Learning
-Machine Learning para detectar o objeto.
-
-#### Sistema de Navegação
-Sistema de navegação no Mapa.
+Machine Learning para detectar o objeto a partir de imagens provenientes dos pontos de guarda.
