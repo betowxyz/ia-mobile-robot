@@ -19,4 +19,4 @@ Com os pontos de guarda e as rotas estabelecidas, a tarefa restante é verificar
 ## Visibilidade + A Star
 Dado um mapa simulado e com nosso sistema de IA rodando, podemos visualizar os pontos de guarda, a ordem dos mesmos e os caminhos entre eles:
 
-![](/img/output.jpg)
+![](/img/output.JPG)
