@@ -51,6 +51,7 @@ typedef struct{
 typedef struct{
     Ponto *path;
     int tamanho;
+    float custo;
 }Path;
 
 /*
@@ -88,7 +89,7 @@ Node initEmptyNode(); // Inicializacao da estrutura NODE vazio
 Node * initNodePointer(Node node); // Inicializacao da estrutura NODE como ponteiro a partir de um node existente
 ClosedList * initClosedList(); // Inicializacao da estrutura CLOSEDLIST
 Path * initPath(); // Inicializacao da estrutura PATH
-ListaPath * initListaPath(Visibilidade *visibilidade, Mapa *mapa); // Inicializa a estrutura LISTA PATH
+ListaPath * initListaPath(Visibilidade *visibilidade, Mapa *mapa); // Inicializa a estrutura LISTA PATH e planeja repetidamente as rotas entre PN e proximo ponto mais proximo
 PriorityQueue initMaxHeap(); // Inicializacao da estrutura MAXHEAP
 
 /*
@@ -104,7 +105,7 @@ void printListaPath(ListaPath *listaPath); // Printa as rotas geradas pelo Plane
 void setGuardas(Mapa *mapa, Visibilidade *visibilidade); // Posiciona os guardas no mapa como "8"
 void setPath(Mapa *mapa, ListaPath *listaPath); // Posiciona os pontos de ROTA no mapa
 Ponto catchNext(Mapa *mapa); // Pesquisa pelo proximo ponto sem visibilidade do Robo
-
+void exportaMapa(Mapa *mapa); // Exporta Mapa para arquivo externo
 /*
     ESTRUTURAIS
 */
