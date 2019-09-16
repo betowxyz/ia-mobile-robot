@@ -9,7 +9,7 @@ A primeira tarefa da IA é definir os pontos de guarda no mapa, para isto, utili
 ![](/img/visibilidade.png)
 
 #### Path-Planning
-Uma vez que temos os pontos de guarda, necessários para total visibilidade, é necessário estabelecer as rotas dentre estes pontos, porém, não podemos simplesmente traças estas rotas sem levar em conta as distâncias entre estes pontos, então antes de tudo, ordenamos a lista de pontos de guarda de acordo com a distância entre o ponto de guarda (N), e o próximo ponto de guarda (N+1). Feito isso, planejamos as rotas para todos os conjuntos de pontos (N, N+1) utilizando o algoritmo A Star.
+Uma vez que temos os pontos de guarda necessários para total visibilidade, é necessário estabelecer as rotas entre estes pontos, porém, não podemos simplesmente traças estas rotas sem levar em conta as distâncias entre os mesmos, então planejamos as rotas entre os pontos de guarda X e 1, X e 2 ... X e N, até que encontremos o ponto com caminho mais próximo de X, repetindo esta etapa até planejarmos todas as rotas, de tal meneira, teremos a MENOR ROTA POSSÍVEL para visitar os pontos de guarda.
 
 ![](/img/astar.gif)
 
