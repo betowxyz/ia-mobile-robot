@@ -17,6 +17,6 @@ Uma vez que temos os pontos de guarda, necessários para total visibilidade, é 
 Com os pontos de guarda e as rotas estabelecidas, a tarefa restante é verificar se a bola vermelha está ao alcance do Robô. Com a ferramenta OpenCV, detectamos apenas os pixels vermelhos das imagens e depois verificamos se estes pixels configuram um círculo.
 
 ## Visibilidade + A Star
-Dado um mapa simulado e com nosso sistema de IA rodando, podemos visualizar os pontos de guarda, a ordem dos mesmos e os caminhos entre eles:
+Dado um mapa simulado e com nosso sistema de IA rodando, podemos visualizar os pontos de guarda e os caminhos entre eles:
 
 ![](/img/output.png)
