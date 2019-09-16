@@ -154,19 +154,38 @@ Path * initPath(){
     Path *path=(Path*)calloc(1, sizeof(Path));
     path->path=(Ponto*)calloc(MAXPATH ,sizeof(Ponto));
     path->tamanho = 0;
+    path->custo = 0;
     return path;
 }
 
 /*
     Inicializa a estrutura LISTA PATH, /*
-    Executa Path Planning entre os pontos de guarda (PO -> P1, P1 -> P2, P2 -> P3... PN-1 -> PN)
+    Executa Path Planning entre o ponto inicial e os outros pontos de guarda, procurando pelo ponto com caminho mais proximo
 */
 ListaPath * initListaPath(Visibilidade *visibilidade, Mapa *mapa){
     ListaPath * listaPath = (ListaPath*)calloc(1, sizeof(ListaPath));
     listaPath->tamanho = visibilidade->quantidade -1;
     listaPath->paths = (Path*)calloc(listaPath->tamanho, sizeof(Path));
-    for(int i=0; i<listaPath->tamanho; i++){
-        listaPath->paths[i] = *aStar(visibilidade->pontos[i], visibilidade->pontos[i+1], mapa); // Erro esta aqui
+    Path *path;
+    int i, j, index;
+    Ponto aux;
+    float menorCusto, custo;
+    // Loop para cada ponto
+    for(i=0; i<visibilidade->quantidade-1; i++){
+        menorCusto = MAXCUSTO;
+        for(j=i+1; j<visibilidade->quantidade; j++){
+            // custo = heuristica(visibilidade->pontos[i], visibilidade->pontos[j]);
+            path = aStar(visibilidade->pontos[i], visibilidade->pontos[j], mapa);
+            custo = path->custo;
+            if(custo < menorCusto){
+                index = j;
+                menorCusto = custo;
+            }
+        }
+        listaPath->paths[i] = *path;
+        aux = visibilidade->pontos[i+1];
+        visibilidade->pontos[i+1] = visibilidade->pontos[index];
+        visibilidade->pontos[index] = aux;
     }
     return listaPath;
 }
@@ -192,7 +211,7 @@ PriorityQueue initMaxHeap() {
 */
 void printMapa(Mapa *mapa){
     printf("\n- - - - - - - - - - - - - - MAPA - - - - - - - - - - - - - - ");
-    int a, aa, numeroGuarda;
+    int a, aa;
     for(a=0; a<mapa->altura; a++){
         printf("\n");
         for(aa=0; aa<mapa->largura; aa++){
@@ -223,7 +242,7 @@ void printGuardas(Visibilidade *visibilidade){
 */
 void printListaPath(ListaPath *listaPath){
     for(int i=0; i<listaPath->tamanho; i++){
-        printf("\nRota %d:\n", i);
+        printf("\nRota (custo: %f) %d:\n", listaPath->paths[i].custo, i);
         for(int j = listaPath->paths[i].tamanho-1; j>=0; j--){
             printf("(%d, %d)", listaPath->paths[i].path[j].x, listaPath->paths[i].path[j].y, " -> ");
         }
@@ -271,6 +290,30 @@ Ponto catchNext(Mapa *mapa){
     proximo.x = -1;
     proximo.y = -1;
     return proximo;
+}
+
+/*
+    Exporta mapa para arquivo externo output.txt
+*/
+void exportaMapa(Mapa *mapa){
+    FILE *f = fopen("output.txt", "r+");
+    int a, aa, numeroGuarda;
+    if (f == NULL){
+        printf("Error opening file!\n");
+        exit(1);
+    }
+    for(a=0; a<mapa->altura; a++){
+        fputs("[", f);
+        for(aa=0; aa<mapa->largura; aa++){
+            if(mapa->mapa[a][aa]==0) fputs("  ,", f); // LIVRE - SEM VISAO
+            if(mapa->mapa[a][aa]==2) fputs(" -,", f); // LIVRE - COM VISAO
+            if(mapa->mapa[a][aa]==1) fputs(" #,", f); // CHEIO - OBSTACULO
+            if(mapa->mapa[a][aa]==-5) fputs(" o,", f); // LIVRE - PARTE DA ROTA
+            if(mapa->mapa[a][aa]>9) fprintf(f, " %d,", mapa->mapa[a][aa]-10); // LIVRE - PONTO DE GAURDA
+        }
+    fputs("],\n", f);
+    }
+    fclose(f);
 }
 
 /*
@@ -470,29 +513,6 @@ void raio(int x0, int y0, int x1, int y1, Mapa *mapa) { // ~BRESEHANS LINE ALGOR
 */
 
 /*
-    Ordena a lista de guardas de acordo com a menor distancia entre P1 - P2, P2 - P3, etc.
-*/
-void ordenaGuardas(Visibilidade *visibilidade){
-    int i, j, index;
-    Ponto aux;
-    float menorCusto, custo;
-    // Loop para cada ponto
-    for(i=0; i<visibilidade->quantidade-2; i++){
-        menorCusto = MAXCUSTO;
-        for(j=i+1; j<visibilidade->quantidade; j++){
-            custo = heuristica(visibilidade->pontos[i], visibilidade->pontos[j]);
-            if(custo < menorCusto){
-                index = j;
-                menorCusto = custo;
-            }
-        }
-        aux = visibilidade->pontos[i+1];
-        visibilidade->pontos[i+1] = visibilidade->pontos[index];
-        visibilidade->pontos[index] = aux;
-    }
-}
-
-/*
     Calculo de distancia a partir da heuristica
 */
 float heuristica(Ponto a, Ponto b){
@@ -531,6 +551,7 @@ Path * aStar(Ponto inicio, Ponto objetivo, Mapa *mapa){
         // Encontrou o objetivo
         if(atual.posicao.x == objetivoNode.posicao.x && atual.posicao.y == objetivoNode.posicao.y){
             Path *path = initPath();
+            path->custo = atual.g;
             while(atual.parente != NULL){
                 pushPath(path, atual.posicao);
                 atual = *atual.parente;
@@ -614,7 +635,6 @@ int main(){
     Visibilidade *visibilidade = initVisibilidade();
     processamentoVisibilidade(mapa, visibilidade);
     // M2
-    ordenaGuardas(visibilidade);
     ListaPath * listaPath = initListaPath(visibilidade, mapa);
     // Grafico
     setPath(mapa, listaPath);
