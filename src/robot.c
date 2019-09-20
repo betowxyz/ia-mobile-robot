@@ -29,13 +29,13 @@
 // Guardas
 #define MAXGUARDA (100)
 // Ordenacao dos pontos de guarda
-#define MAXCUSTO (100000)
+#define MAXCUSTO (1000000)
 // Path
-#define MAXPATH (100)
+#define MAXPATH (10000)
 // Heap
-#define MAXHEAPSIZE (1000)
+#define MAXHEAPSIZE (10000)
 // ClosedList
-#define MAXCLOSEDLIST (1000)
+#define MAXCLOSEDLIST (10000)
 
 /*
 INICIALIZACAO DE ESTRUTURAS
@@ -174,7 +174,6 @@ ListaPath * initListaPath(Visibilidade *visibilidade, Mapa *mapa){
     for(i=0; i<visibilidade->quantidade-1; i++){
         menorCusto = MAXCUSTO;
         for(j=i+1; j<visibilidade->quantidade; j++){
-            // custo = heuristica(visibilidade->pontos[i], visibilidade->pontos[j]);
             path = aStar(visibilidade->pontos[i], visibilidade->pontos[j], mapa);
             if(path->custo < menorCusto){
                 pathOtimo = path;
@@ -182,7 +181,6 @@ ListaPath * initListaPath(Visibilidade *visibilidade, Mapa *mapa){
                 menorCusto = path->custo;
             }
         }
-        printf("\n Ponto Inicial: (%d, %d), Final: (%d, %d), Custo: %f", visibilidade->pontos[i].x, visibilidade->pontos[i].y, visibilidade->pontos[index].x, visibilidade->pontos[index].y, menorCusto);
         listaPath->paths[i] = *pathOtimo;
         aux = visibilidade->pontos[i+1];
         visibilidade->pontos[i+1] = visibilidade->pontos[index];
@@ -356,12 +354,13 @@ bool maxHeapCheia(PriorityQueue H) {
 void pushMaxHeap(PriorityQueue H, Node X) {
     int i;
     if(maxHeapCheia(H)){
+        printf("\nErro: MaxHeap Cheia...");
         return;
     }
-    for (i = ++H->tamanho; H->Elements[ i / 2 ].f > X.f; i /= 2){
-        H->Elements[ i ] = H->Elements[ i / 2 ];
+    for (i = ++H->tamanho; H->Elements[i/2].f > X.f; i/= 2){
+        H->Elements[i] = H->Elements[i/2];
     }
-    H->Elements[ i ] = X;
+    H->Elements[i] = X;
 }
 
 /*
@@ -624,7 +623,7 @@ Path * aStar(Ponto inicio, Ponto objetivo, Mapa *mapa){
     Funcao Principal
 */
 int main(){
-    // Recebendo MAPA e PONTO INICIAL
+    // Iniciailizando estruturas
     Mapa *mapa = initMapa();
     if(mapa == NULL) return 0;
 
@@ -637,14 +636,14 @@ int main(){
     ListaPath * listaPath = initListaPath(visibilidade, mapa);
 
     // Grafico
-    setGuardas(mapa, visibilidade);
     setPath(mapa, listaPath);
-    // printMapa(mapa);
-
+    setGuardas(mapa, visibilidade);
+    printMapa(mapa);
+    exportaMapa(mapa);
     // Libera
     liberaMapa(mapa);
     liberaVisibilidade(visibilidade);
-    liberaListaPath(listaPath);
+    // liberaListaPath(listaPath);
 
     // f
     return 0;
