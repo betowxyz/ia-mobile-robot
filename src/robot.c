@@ -166,23 +166,24 @@ ListaPath * initListaPath(Visibilidade *visibilidade, Mapa *mapa){
     ListaPath * listaPath = (ListaPath*)calloc(1, sizeof(ListaPath));
     listaPath->tamanho = visibilidade->quantidade -1;
     listaPath->paths = (Path*)calloc(listaPath->tamanho, sizeof(Path));
-    Path *path;
+    Path *path, *pathOtimo;
     int i, j, index;
     Ponto aux;
-    float menorCusto, custo;
+    float menorCusto;
     // Loop para cada ponto
     for(i=0; i<visibilidade->quantidade-1; i++){
         menorCusto = MAXCUSTO;
         for(j=i+1; j<visibilidade->quantidade; j++){
             // custo = heuristica(visibilidade->pontos[i], visibilidade->pontos[j]);
             path = aStar(visibilidade->pontos[i], visibilidade->pontos[j], mapa);
-            custo = path->custo;
-            if(custo < menorCusto){
+            if(path->custo < menorCusto){
+                pathOtimo = path;
                 index = j;
-                menorCusto = custo;
+                menorCusto = path->custo;
             }
         }
-        listaPath->paths[i] = *path;
+        printf("\n Ponto Inicial: (%d, %d), Final: (%d, %d), Custo: %f", visibilidade->pontos[i].x, visibilidade->pontos[i].y, visibilidade->pontos[index].x, visibilidade->pontos[index].y, menorCusto);
+        listaPath->paths[i] = *pathOtimo;
         aux = visibilidade->pontos[i+1];
         visibilidade->pontos[i+1] = visibilidade->pontos[index];
         visibilidade->pontos[index] = aux;
@@ -255,8 +256,7 @@ void printListaPath(ListaPath *listaPath){
     Posiciona os pontos de GUARDA no mapa
 */
 void setGuardas(Mapa *mapa, Visibilidade *visibilidade){
-    int i;
-    for(i=0; i<visibilidade->quantidade; i++){
+    for(int i=0; i<visibilidade->quantidade; i++){
         mapa->mapa[visibilidade->pontos[i].x][visibilidade->pontos[i].y] = 10+i;
     }
 }
@@ -293,7 +293,7 @@ Ponto catchNext(Mapa *mapa){
 }
 
 /*
-    Exporta mapa para arquivo externo output.txt
+    Exporta mapa para arquivo externo output.txt (Formato numpy)
 */
 void exportaMapa(Mapa *mapa){
     FILE *f = fopen("output.txt", "r+");
@@ -487,7 +487,7 @@ void raio(int x0, int y0, int x1, int y1, Mapa *mapa) { // ~BRESEHANS LINE ALGOR
     int dy = abs(y1-y0), sy = y0<y1 ? 1 : -1;
     int err = (dx>dy ? dx : -dy)/2, e2;
     int dist=0;
-    for(;;){ // Substituir for infinito por: while((x0==x1 && y0==y1) || (mapa->mapa[x0][y0]==1);
+    for(;;){
         dist++; // Podemos usar esse dist
         if(x0==x1 && y0==y1){
             break; // Fim do Raio
@@ -620,30 +620,32 @@ Path * aStar(Ponto inicio, Ponto objetivo, Mapa *mapa){
     return path;
 }
 
-//  M3 - DETECT THE BALL (OBJECTIVE)
-//  https://solarianprogrammer.com/2015/05/08/detect-red-circles-image-using-opencv/
-
 /*
     Funcao Principal
 */
 int main(){
-    // Iniciailizando estruturas
+    // Recebendo MAPA e PONTO INICIAL
     Mapa *mapa = initMapa();
     if(mapa == NULL) return 0;
+
     // M1
     printMapa(mapa);
     Visibilidade *visibilidade = initVisibilidade();
     processamentoVisibilidade(mapa, visibilidade);
+
     // M2
     ListaPath * listaPath = initListaPath(visibilidade, mapa);
+
     // Grafico
-    setPath(mapa, listaPath);
     setGuardas(mapa, visibilidade);
-    printMapa(mapa);
+    setPath(mapa, listaPath);
+    // printMapa(mapa);
+
     // Libera
     liberaMapa(mapa);
     liberaVisibilidade(visibilidade);
     liberaListaPath(listaPath);
+
     // f
     return 0;
 }
