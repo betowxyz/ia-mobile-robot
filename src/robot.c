@@ -63,7 +63,7 @@ Mapa * initMapa(){
         // LARGURA
         // MAPA
         // PONTO DE INICIO
-    FILE *file = fopen("inputMap9090Visibilidade.txt","r");
+    FILE *file = fopen("inputMap90x90_2.txt","r");
     if(file == NULL){
         perror("\nErro abrindo arquivo de entrada do mapa...");
         return NULL;
