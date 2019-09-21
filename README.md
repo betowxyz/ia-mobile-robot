@@ -1,4 +1,4 @@
-# Inteligência Artificial para Robô Móvel de Busca :shipit:
+# Robô Móvel de Busca :shipit:
 
 ### Introdução
 Inteligência Artifical que, a partir das entradas: Mapa, e ponto inicial do robô, defina os pontos necessários para o robô visitar, de tal forma que, se o robô passe por todos estes pontos e olhe ao seu redor (FoV 360º), ele alcance visibilidade de todo o mapa. A partir desses pontos gerados, é responsável por estabelecer a melhor rota entre os mesmos (começando do ponto inicial) e verificar com auxílio da ferramenta OpenCV, se a bola vermelha (objetivo) está ao seu alcance, caso esteja, ela traça a melhor rota até ela.
