@@ -27,15 +27,15 @@
 */
 
 // Guardas
-#define MAXGUARDA (100)
+#define MAXGUARDA (100000)
 // Ordenacao dos pontos de guarda
 #define MAXCUSTO (1000000)
 // Path
-#define MAXPATH (10000)
+#define MAXPATH (100000)
 // Heap
-#define MAXHEAPSIZE (10000)
+#define MAXHEAPSIZE (100000)
 // ClosedList
-#define MAXCLOSEDLIST (10000)
+#define MAXCLOSEDLIST (100000)
 
 /*
 INICIALIZACAO DE ESTRUTURAS
@@ -63,7 +63,7 @@ Mapa * initMapa(){
         // LARGURA
         // MAPA
         // PONTO DE INICIO
-    FILE *file = fopen("inputMap.txt","r");
+    FILE *file = fopen("inputMap9090Visibilidade.txt","r");
     if(file == NULL){
         perror("\nErro abrindo arquivo de entrada do mapa...");
         return NULL;
@@ -303,11 +303,11 @@ void exportaMapa(Mapa *mapa){
     for(a=0; a<mapa->altura; a++){
         fputs("[", f);
         for(aa=0; aa<mapa->largura; aa++){
-            if(mapa->mapa[a][aa]==0) fputs("  ,", f); // LIVRE - SEM VISAO
-            if(mapa->mapa[a][aa]==2) fputs(" -,", f); // LIVRE - COM VISAO
-            if(mapa->mapa[a][aa]==1) fputs(" #,", f); // CHEIO - OBSTACULO
-            if(mapa->mapa[a][aa]==-5) fputs(" o,", f); // LIVRE - PARTE DA ROTA
-            if(mapa->mapa[a][aa]>9) fprintf(f, " %d,", mapa->mapa[a][aa]-10); // LIVRE - PONTO DE GAURDA
+            if(mapa->mapa[a][aa]==0) fputs("  0,", f); // LIVRE - SEM VISAO
+            if(mapa->mapa[a][aa]==2) fputs(" 200,", f); // LIVRE - COM VISAO
+            if(mapa->mapa[a][aa]==1) fputs(" -255,", f); // CHEIO - OBSTACULO
+            if(mapa->mapa[a][aa]==-5) fputs(" 200,", f); // LIVRE - PARTE DA ROTA
+            if(mapa->mapa[a][aa]>9) fputs(" 400,", f); // LIVRE - PONTO DE GAURDA
         }
     fputs("],\n", f);
     }
@@ -464,11 +464,11 @@ int processamentoVisibilidade(Mapa *mapa, Visibilidade *visibilidade){
         visibilidade->quantidade++;
         visibilidade->pontos[visibilidade->quantidade] = proximoPonto;
         // DOIS LOOPS: UM PARA ATIRAR NO SENTIDO VERTICAL, E OUTRO NO HORIZONTAL
-        for(i=0; i<mapa->largura; i++){ // SENTIDO VERTICAL
+        for(i=0; i<=mapa->largura; i++){ // SENTIDO VERTICAL
             raio(proximoPonto.x, proximoPonto.y, 0, i, mapa); // CIMA -> 0, I (ITERAR ATE LARGURA)
             raio(proximoPonto.x, proximoPonto.y, mapa->altura, i, mapa); // BAIXO -> ALTURA, I (ITERAR ATE LARGURA)
         }
-        for(j=0; j<mapa->altura; j++){ // SENTIDO HORIZONTAL
+        for(j=0; j<=mapa->altura; j++){ // SENTIDO HORIZONTAL
             raio(proximoPonto.x, proximoPonto.y, j, mapa->largura, mapa); // DIREITA -> J, LARGURA (ITERAR ATE ATLURA)
             raio(proximoPonto.x, proximoPonto.y, j, 0, mapa); // ESQUERDA -> J, 0 (ITERAR ATE ALTURA)
         }
@@ -631,6 +631,7 @@ int main(){
     printMapa(mapa);
     Visibilidade *visibilidade = initVisibilidade();
     processamentoVisibilidade(mapa, visibilidade);
+    printMapa(mapa);
 
     // M2
     ListaPath * listaPath = initListaPath(visibilidade, mapa);
@@ -639,12 +640,12 @@ int main(){
     setPath(mapa, listaPath);
     setGuardas(mapa, visibilidade);
     printMapa(mapa);
-    exportaMapa(mapa);
+
     // Libera
     liberaMapa(mapa);
     liberaVisibilidade(visibilidade);
-    // liberaListaPath(listaPath);
+    liberaListaPath(listaPath);
 
-    // f
+    // 0
     return 0;
 }
