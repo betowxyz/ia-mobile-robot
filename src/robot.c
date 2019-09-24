@@ -1,7 +1,7 @@
 /**
     robotAutomation.c
     @author: Roberto Marinheiro
-    @version: 6.5 24/09/19
+    @version: 6.1 12/09/19
     Purpose: Sistema de Veiculo Autonomo, dado um Mapa e a localizacao inicial do robo,
     definir os pontos tais que, se o robo visitar todos estes, ele tera visibilidade total do Mapa
 */
@@ -164,14 +164,14 @@ Path * initPath(){
 */
 ListaPath * initListaPath(Visibilidade *visibilidade, Mapa *mapa){
     ListaPath * listaPath = (ListaPath*)calloc(1, sizeof(ListaPath));
-    listaPath->tamanho = visibilidade->quantidade;
+    listaPath->tamanho = visibilidade->quantidade-1;
     listaPath->paths = (Path*)calloc(listaPath->tamanho, sizeof(Path));
     Path *path, *pathOtimo;
     int i, j, index;
     Ponto aux;
     float menorCusto;
     // Loop para cada ponto
-    for(i=0; i<visibilidade->quantidade; i++){
+    for(i=0; i<visibilidade->quantidade-1; i++){
         menorCusto = MAXCUSTO;
         for(j=i+1; j<visibilidade->quantidade; j++){
             path = aStar(visibilidade->pontos[i], visibilidade->pontos[j], mapa);
@@ -230,7 +230,7 @@ void printMapa(Mapa *mapa){
 void printGuardas(Visibilidade *visibilidade){
     printf("\nPrintando Guardas:");
     int i;
-    for(i=0; i<=visibilidade->quantidade; i++){
+    for(i=0; i<visibilidade->quantidade; i++){
         printf("\nGuarda %d, x: %d, y: %d", i, visibilidade->pontos[i].x, visibilidade->pontos[i].y);
     }
     printf("\n");
@@ -261,7 +261,7 @@ void printPonto(Ponto ponto){
     Posiciona os pontos de GUARDA no mapa
 */
 void setGuardas(Mapa *mapa, Visibilidade *visibilidade){
-    for(int i=0; i<=visibilidade->quantidade; i++){
+    for(int i=0; i<visibilidade->quantidade; i++){
         mapa->mapa[visibilidade->pontos[i].x][visibilidade->pontos[i].y] = 10+i;
     }
 }
@@ -635,15 +635,16 @@ int main(){
     if(mapa == NULL) return 0;
     Visibilidade *visibilidade = initVisibilidade();
     processamentoVisibilidade(mapa, visibilidade);
-
+    printGuardas(visibilidade);
     // M2
     ListaPath * listaPath = initListaPath(visibilidade, mapa);
 
     // Grafico
     setPath(mapa, listaPath);
-    printMapa(mapa);
     setGuardas(mapa, visibilidade);
+    printMapa(mapa);
     printListaPath(listaPath);
+    // exportaMapa(mapa);
     
     // Libera
     liberaMapa(mapa);
