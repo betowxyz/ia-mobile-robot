@@ -1,7 +1,7 @@
 /**
     robotAutomation.c
     @author: Roberto Marinheiro
-    @version: 6.1 12/09/19
+    @version: 6.5 24/09/19
     Purpose: Sistema de Veiculo Autonomo, dado um Mapa e a localizacao inicial do robo,
     definir os pontos tais que, se o robo visitar todos estes, ele tera visibilidade total do Mapa
 */
@@ -63,7 +63,7 @@ Mapa * initMapa(){
         // LARGURA
         // MAPA
         // PONTO DE INICIO
-    FILE *file = fopen("inputMap90x90_2.txt","r");
+    FILE *file = fopen("mapa90x90_1.txt","r");
     if(file == NULL){
         perror("\nErro abrindo arquivo de entrada do mapa...");
         return NULL;
@@ -95,7 +95,7 @@ Visibilidade * initVisibilidade(){
     Visibilidade *visibilidade=(Visibilidade*)calloc(1,sizeof(Visibilidade));
     visibilidade->pontos=(Ponto*)calloc(MAXGUARDA,sizeof(Ponto*)); // Numero maximo de pontos de guarda: MAXGUARDA
     visibilidade->completoVisivel = 0;
-    visibilidade->quantidade = -1;
+    visibilidade->quantidade = 0;
 }
 
 /*
@@ -164,14 +164,14 @@ Path * initPath(){
 */
 ListaPath * initListaPath(Visibilidade *visibilidade, Mapa *mapa){
     ListaPath * listaPath = (ListaPath*)calloc(1, sizeof(ListaPath));
-    listaPath->tamanho = visibilidade->quantidade -1;
+    listaPath->tamanho = visibilidade->quantidade;
     listaPath->paths = (Path*)calloc(listaPath->tamanho, sizeof(Path));
     Path *path, *pathOtimo;
     int i, j, index;
     Ponto aux;
     float menorCusto;
     // Loop para cada ponto
-    for(i=0; i<visibilidade->quantidade-1; i++){
+    for(i=0; i<visibilidade->quantidade; i++){
         menorCusto = MAXCUSTO;
         for(j=i+1; j<visibilidade->quantidade; j++){
             path = aStar(visibilidade->pontos[i], visibilidade->pontos[j], mapa);
@@ -230,7 +230,7 @@ void printMapa(Mapa *mapa){
 void printGuardas(Visibilidade *visibilidade){
     printf("\nPrintando Guardas:");
     int i;
-    for(i=0; i<visibilidade->quantidade; i++){
+    for(i=0; i<=visibilidade->quantidade; i++){
         printf("\nGuarda %d, x: %d, y: %d", i, visibilidade->pontos[i].x, visibilidade->pontos[i].y);
     }
     printf("\n");
@@ -248,13 +248,20 @@ void printListaPath(ListaPath *listaPath){
     }
 }
 
+/*
+    Printa coordenadas do ponto
+*/
+void printPonto(Ponto ponto){
+    printf("\n(%d, %d)", ponto.x, ponto.y);
+}
+
 // FUNCOES GERAIS
 
 /*
     Posiciona os pontos de GUARDA no mapa
 */
 void setGuardas(Mapa *mapa, Visibilidade *visibilidade){
-    for(int i=0; i<visibilidade->quantidade; i++){
+    for(int i=0; i<=visibilidade->quantidade; i++){
         mapa->mapa[visibilidade->pontos[i].x][visibilidade->pontos[i].y] = 10+i;
     }
 }
@@ -372,21 +379,21 @@ Node popMaxHeap(PriorityQueue H) {
     if (maxHeapVazia(H)){
         return H->Elements[0];
     }
-    minElement = H->Elements[ 1 ];
-    lastElement = H->Elements[ H->tamanho-- ];
-    for (i = 1; i * 2 <= H->tamanho; i = child) {
-        child = i * 2;
-        if (child != H->tamanho && H->Elements[ child + 1 ].f < H->Elements[ child ].f){
+    minElement = H->Elements[1];
+    lastElement = H->Elements[H->tamanho--];
+    for (i=1; i*2<=H->tamanho; i=child) {
+        child = i*2;
+        if (child != H->tamanho && H->Elements[child+1].f < H->Elements[child].f){
             child++;
             }
-        if (lastElement.f > H->Elements[ child ].f){
-            H->Elements[ i ] = H->Elements[ child ];
+        if (lastElement.f>H->Elements[child].f){
+            H->Elements[i] = H->Elements[child];
         }
         else{
             break;
         }
     }
-    H->Elements[ i ] = lastElement;
+    H->Elements[i] = lastElement;
     return minElement;
 }
 
@@ -461,8 +468,8 @@ int processamentoVisibilidade(Mapa *mapa, Visibilidade *visibilidade){
     int i, j;
     Ponto proximoPonto = mapa->inicio;
     while(visibilidade->completoVisivel==0){
-        visibilidade->quantidade++;
         visibilidade->pontos[visibilidade->quantidade] = proximoPonto;
+        visibilidade->quantidade++;
         // DOIS LOOPS: UM PARA ATIRAR NO SENTIDO VERTICAL, E OUTRO NO HORIZONTAL
         for(i=0; i<=mapa->largura; i++){ // SENTIDO VERTICAL
             raio(proximoPonto.x, proximoPonto.y, 0, i, mapa); // CIMA -> 0, I (ITERAR ATE LARGURA)
@@ -623,24 +630,21 @@ Path * aStar(Ponto inicio, Ponto objetivo, Mapa *mapa){
     Funcao Principal
 */
 int main(){
-    // Iniciailizando estruturas
+    // M1
     Mapa *mapa = initMapa();
     if(mapa == NULL) return 0;
-
-    // M1
-    printMapa(mapa);
     Visibilidade *visibilidade = initVisibilidade();
     processamentoVisibilidade(mapa, visibilidade);
-    printMapa(mapa);
 
     // M2
     ListaPath * listaPath = initListaPath(visibilidade, mapa);
 
     // Grafico
     setPath(mapa, listaPath);
-    setGuardas(mapa, visibilidade);
     printMapa(mapa);
-
+    setGuardas(mapa, visibilidade);
+    printListaPath(listaPath);
+    
     // Libera
     liberaMapa(mapa);
     liberaVisibilidade(visibilidade);
