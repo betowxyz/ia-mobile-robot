@@ -214,11 +214,11 @@ void printMapa(Mapa *mapa){
     for(a=0; a<mapa->altura; a++){
         printf("\n");
         for(aa=0; aa<mapa->largura; aa++){
-            if(mapa->mapa[a][aa]==0) printf("  "); // LIVRE - SEM VISAO
             if(mapa->mapa[a][aa]==2) printf(" -"); // LIVRE - COM VISAO
-            if(mapa->mapa[a][aa]==1) printf(" #"); // CHEIO - OBSTACULO
-            if(mapa->mapa[a][aa]==-5) printf(" o"); // LIVRE - PARTE DA ROTA
-            if(mapa->mapa[a][aa]>9) printf(" %d", mapa->mapa[a][aa]-10); // LIVRE - PONTO DE GAURDA
+            else if(mapa->mapa[a][aa]==-5) printf(" o"); // LIVRE - PARTE DA ROTA
+            else if(mapa->mapa[a][aa]==1) printf(" #"); // CHEIO - OBSTACULO
+            else if(mapa->mapa[a][aa]==0) printf("  "); // LIVRE - SEM VISAO
+            else if(mapa->mapa[a][aa]>9) printf(" %d", mapa->mapa[a][aa]-10); // LIVRE - PONTO DE GAURDA
         }
     }
     printf("\n\nLegenda: \n' ' = Sem visao (Livre)\n'#' = Obstaculo\n'-' = Com Visao (Livre)\n'0-N' = Guarda (Livre)\n'o' = Rota (Livre)\n");
@@ -311,7 +311,7 @@ void exportaMapa(Mapa *mapa){
         fputs("[", f);
         for(aa=0; aa<mapa->largura; aa++){
             if(mapa->mapa[a][aa]==0) fputs("  0,", f); // LIVRE - SEM VISAO
-            if(mapa->mapa[a][aa]==2) fputs(" 200,", f); // LIVRE - COM VISAO
+            if(mapa->mapa[a][aa]==2) fputs(" 0,", f); // LIVRE - COM VISAO
             if(mapa->mapa[a][aa]==1) fputs(" -255,", f); // CHEIO - OBSTACULO
             if(mapa->mapa[a][aa]==-5) fputs(" 200,", f); // LIVRE - PARTE DA ROTA
             if(mapa->mapa[a][aa]>9) fputs(" 400,", f); // LIVRE - PONTO DE GAURDA
@@ -643,8 +643,7 @@ int main(){
     setPath(mapa, listaPath);
     setGuardas(mapa, visibilidade);
     printMapa(mapa);
-    printListaPath(listaPath);
-    // exportaMapa(mapa);
+    exportaMapa(mapa);
     
     // Libera
     liberaMapa(mapa);
