@@ -98,6 +98,7 @@ PriorityQueue initMaxHeap(); // Inicializacao da estrutura MAXHEAP
 void printMapa(Mapa *mapa); // Printa o mapa no console
 void printGuardas(Visibilidade *visibilidade); // Printa os pontos necessarios para total visibiliade
 void printListaPath(ListaPath *listaPath); // Printa as rotas geradas pelo PlanejamentoMestre & AStar
+void printPonto(Ponto ponto); // Printa coordenadas do ponto
 
 /* 
     GERAL
