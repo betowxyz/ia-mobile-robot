@@ -107,7 +107,7 @@ void printPonto(Ponto ponto); // Printa coordenadas do ponto
 void setGuardas(Mapa *mapa, Visibilidade *visibilidade); // Posiciona os guardas no mapa como "8"
 void setPath(Mapa *mapa, ListaPath *listaPath); // Posiciona os pontos de ROTA no mapa
 Ponto catchNext(Mapa *mapa); // Pesquisa pelo proximo ponto sem visibilidade do Robo
-void exportaMapaPlot(Mapa *mapa); // Exporta Mapa para arquivo externo com valores para plot
+void exportaMapa(Mapa *mapa); // Exporta Mapa para arquivo externo com valores para plot
 
 /*
     ESTRUTURAIS
