@@ -316,7 +316,7 @@ Ponto catchNext(Mapa *mapa){
     Exporta mapa para arquivo externo output.txt (Formato numpy)
 */
 void exportaMapaPlot(Mapa *mapa){
-    FILE *f = fopen("output.txt", "r+");
+    FILE *f = fopen("../output/output.txt", "r+");
     int a, aa, numeroGuarda;
     if (f == NULL){
         printf("Error opening file!\n");
@@ -703,6 +703,26 @@ Path * aStar(Ponto inicio, Ponto objetivo, Mapa *mapa){
 }
 
 /*
+    SIMULACAO - Plot
+*/
+int plot(){
+    Mapa *mapa = initMapa();
+    if(mapa == NULL) return 0;
+    Visibilidade *visibilidade = initVisibilidade();
+    processamentoVisibilidadePlot(mapa, visibilidade); // FUNCAO MODIFICADA PARA FAZER SOMBREAMENTO NO PLOT
+    ListaPath * listaPath = initListaPath(visibilidade, mapa);
+    // export
+    setPath(mapa, listaPath);
+    setGuardas(mapa, visibilidade);
+    exportaMapaPlot(mapa);
+    // free
+    liberaMapa(mapa);
+    liberaVisibilidade(visibilidade);
+    liberaListaPath(listaPath);
+    return 0;
+}
+
+/*
     Funcao de Controle
 */
 int robot(){
@@ -728,26 +748,6 @@ int robot(){
     liberaListaPath(listaPath);
 
     // 0
-    return 0;
-}
-
-/*
-    SIMULACAO - Plot
-*/
-int plot(){
-    Mapa *mapa = initMapa();
-    if(mapa == NULL) return 0;
-    Visibilidade *visibilidade = initVisibilidade();
-    processamentoVisibilidadePlot(mapa, visibilidade); // FUNCAO MODIFICADA PARA FAZER SOMBREAMENTO NO PLOT
-    ListaPath * listaPath = initListaPath(visibilidade, mapa);
-    // export
-    setPath(mapa, listaPath);
-    setGuardas(mapa, visibilidade);
-    exportaMapaPlot(mapa);
-    // free
-    liberaMapa(mapa);
-    liberaVisibilidade(visibilidade);
-    liberaListaPath(listaPath);
     return 0;
 }
 
