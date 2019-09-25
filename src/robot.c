@@ -315,7 +315,7 @@ Ponto catchNext(Mapa *mapa){
 /*
     Exporta mapa para arquivo externo output.txt (Formato numpy)
 */
-void exportaMapaPlot(Mapa *mapa){
+void exportaMapa(Mapa *mapa){
     FILE *f = fopen("../output/output.txt", "r+");
     int a, aa, numeroGuarda;
     if (f == NULL){
@@ -323,17 +323,14 @@ void exportaMapaPlot(Mapa *mapa){
         exit(1);
     }
     for(a=0; a<mapa->altura; a++){
-        fputs("[", f);
         for(aa=0; aa<mapa->largura; aa++){
-            if(mapa->mapa[a][aa]==0) fputs("  0,", f); // LIVRE - SEM VISAO
-            else if(mapa->mapa[a][aa]==-5) fputs(" 200,", f); // LIVRE - PARTE DA ROTA
-            else if(mapa->mapa[a][aa]<0) fprintf(f, " %d,", mapa->mapa[a][aa]); // LIVRE - COM VISAO
-            else if(mapa->mapa[a][aa]==1) fputs(" -255,", f); // CHEIO - OBSTACULO
-            else if(mapa->mapa[a][aa]==14) fputs(" 14,", f); // CHEIO - OBSTACULO
-            else if(mapa->mapa[a][aa]==6) fputs(" 6,", f); // CHEIO - OBSTACULO
-            else if(mapa->mapa[a][aa]>9) fputs(" 400,", f); // LIVRE - PONTO DE GAURDA
+            if(mapa->mapa[a][aa]==2) fputs(" -", f); // LIVRE - COM VISAO
+            else if(mapa->mapa[a][aa]==-5) fputs(" o", f); // LIVRE - PARTE DA ROTA
+            else if(mapa->mapa[a][aa]==1) fputs(" #", f); // CHEIO - OBSTACULO
+            else if(mapa->mapa[a][aa]==0) fputs("  ", f); // LIVRE - SEM VISAO
+            else if(mapa->mapa[a][aa]>9) fprintf(f, " %d", mapa->mapa[a][aa]-10); // LIVRE - PONTO DE GAURDA
         }
-    fputs("],\n", f);
+    fputs("\n", f);
     }
     fclose(f);
 }
@@ -714,7 +711,7 @@ int plot(){
     // export
     setPath(mapa, listaPath);
     setGuardas(mapa, visibilidade);
-    exportaMapaPlot(mapa);
+    exportaMapa(mapa);
     // free
     liberaMapa(mapa);
     liberaVisibilidade(visibilidade);
@@ -740,7 +737,7 @@ int robot(){
     setPath(mapa, listaPath);
     setGuardas(mapa, visibilidade);
     printMapa(mapa);
-    exportaMapaPlot(mapa);
+    exportaMapa(mapa);
 
     // Libera
     liberaMapa(mapa);
