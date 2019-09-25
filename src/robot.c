@@ -18,9 +18,9 @@
 /*
     HEADERS
 */
-#include "general.h" // M0 - General
-#include "visibilidade.h" // M1 - Visibilidade
-#include "pathPlanning.h" // M2 - Path Planning
+#include "../interface/general.h" // M0 - General
+#include "../interface/visibilidade.h" // M1 - Visibilidade
+#include "../interface/pathPlanning.h" // M2 - Path Planning
 
 /*
     CONSTANTES DE CONTROLE
@@ -63,7 +63,7 @@ Mapa * initMapa(){
         // LARGURA
         // MAPA
         // PONTO DE INICIO
-    FILE *file = fopen("mapa90x90_1.txt","r");
+    FILE *file = fopen("../input/mapa90x90_1.txt","r");
     if(file == NULL){
         perror("\nErro abrindo arquivo de entrada do mapa...");
         return NULL;
@@ -225,6 +225,21 @@ void printMapa(Mapa *mapa){
 }
 
 /*
+    Printa o mapa - Valores absolutos
+*/
+void printMapaAbsoluto(Mapa *mapa){
+    printf("\n- - - - - - - - - - - - - - MAPA - - - - - - - - - - - - - - ");
+    int a, aa;
+    for(a=0; a<mapa->altura; a++){
+        printf("\n");
+        for(aa=0; aa<mapa->largura; aa++){
+            printf(" %d", mapa->mapa[a][aa]);
+        }
+    }
+    printf("\n\nLegenda: \n' ' = Sem visao (Livre)\n'#' = Obstaculo\n'-' = Com Visao (Livre)\n'0-N' = Guarda (Livre)\n'o' = Rota (Livre)\n");
+}
+
+/*
     Printa os guardas
 */
 void printGuardas(Visibilidade *visibilidade){
@@ -300,7 +315,7 @@ Ponto catchNext(Mapa *mapa){
 /*
     Exporta mapa para arquivo externo output.txt (Formato numpy)
 */
-void exportaMapa(Mapa *mapa){
+void exportaMapaPlot(Mapa *mapa){
     FILE *f = fopen("output.txt", "r+");
     int a, aa, numeroGuarda;
     if (f == NULL){
@@ -311,10 +326,12 @@ void exportaMapa(Mapa *mapa){
         fputs("[", f);
         for(aa=0; aa<mapa->largura; aa++){
             if(mapa->mapa[a][aa]==0) fputs("  0,", f); // LIVRE - SEM VISAO
-            if(mapa->mapa[a][aa]==2) fputs(" 0,", f); // LIVRE - COM VISAO
-            if(mapa->mapa[a][aa]==1) fputs(" -255,", f); // CHEIO - OBSTACULO
-            if(mapa->mapa[a][aa]==-5) fputs(" 200,", f); // LIVRE - PARTE DA ROTA
-            if(mapa->mapa[a][aa]>9) fputs(" 400,", f); // LIVRE - PONTO DE GAURDA
+            else if(mapa->mapa[a][aa]==-5) fputs(" 200,", f); // LIVRE - PARTE DA ROTA
+            else if(mapa->mapa[a][aa]<0) fprintf(f, " %d,", mapa->mapa[a][aa]); // LIVRE - COM VISAO
+            else if(mapa->mapa[a][aa]==1) fputs(" -255,", f); // CHEIO - OBSTACULO
+            else if(mapa->mapa[a][aa]==14) fputs(" 14,", f); // CHEIO - OBSTACULO
+            else if(mapa->mapa[a][aa]==6) fputs(" 6,", f); // CHEIO - OBSTACULO
+            else if(mapa->mapa[a][aa]>9) fputs(" 400,", f); // LIVRE - PONTO DE GAURDA
         }
     fputs("],\n", f);
     }
@@ -486,6 +503,31 @@ int processamentoVisibilidade(Mapa *mapa, Visibilidade *visibilidade){
 }
 
 /*
+    Faz o processamento da visibilidade disparando raio para todas as direcoes e selecionando novos pontos de guarda - MODIFICADA PARA PLOTS -
+*/
+int processamentoVisibilidadePlot(Mapa *mapa, Visibilidade *visibilidade){
+    int i, j, z = 0;
+    Ponto proximoPonto = mapa->inicio;
+    while(visibilidade->completoVisivel==0){
+        visibilidade->pontos[visibilidade->quantidade] = proximoPonto;
+        visibilidade->quantidade++;
+        // DOIS LOOPS: UM PARA ATIRAR NO SENTIDO VERTICAL, E OUTRO NO HORIZONTAL
+        for(i=0; i<=mapa->largura; i++){ // SENTIDO VERTICAL
+            raioPlot(proximoPonto.x, proximoPonto.y, 0, i, mapa, z); // CIMA -> 0, I (ITERAR ATE LARGURA)
+            raioPlot(proximoPonto.x, proximoPonto.y, mapa->altura, i, mapa, z); // BAIXO -> ALTURA, I (ITERAR ATE LARGURA)
+        }
+        for(j=0; j<=mapa->altura; j++){ // SENTIDO HORIZONTAL
+            raioPlot(proximoPonto.x, proximoPonto.y, j, mapa->largura, mapa, z); // DIREITA -> J, LARGURA (ITERAR ATE ATLURA)
+            raioPlot(proximoPonto.x, proximoPonto.y, j, 0, mapa, z); // ESQUERDA -> J, 0 (ITERAR ATE ALTURA)
+        }
+        proximoPonto = catchNext(mapa);
+        if(proximoPonto.x == -1) visibilidade->completoVisivel = 1;
+        z = z-15;
+    }
+    return 0;
+}
+
+/*
     Cria o raio a ser disparado para verificar a visibilidade
 */
 void raio(int x0, int y0, int x1, int y1, Mapa *mapa) { // ~BRESEHANS LINE ALGORITHM~
@@ -504,6 +546,40 @@ void raio(int x0, int y0, int x1, int y1, Mapa *mapa) { // ~BRESEHANS LINE ALGOR
         if(mapa->mapa[x0][y0]==1){
             break; // Fim do Raio - Sem visao a partir desse ponto
         }
+        e2 = err;
+        if(e2 >-dx){
+            err -= dy; x0 += sx;
+            }
+        if(e2 < dy){
+            err += dx; y0 += sy;
+        }
+    }
+}
+
+/*
+    Cria o raio a ser disparado para verificar a visibilidade
+*/
+void raioPlot(int x0, int y0, int x1, int y1, Mapa *mapa, int z) { // ~BRESEHANS LINE ALGORITHM~
+    int dx = abs(x1-x0), sx = x0<x1 ? 1 : -1;
+    int dy = abs(y1-y0), sy = y0<y1 ? 1 : -1;
+    int err = (dx>dy ? dx : -dy)/2, e2;
+    int dist=0;
+    int control, v = -15;
+    for(;;){
+        dist++; // Podemos usar esse dist
+        if(x0==x1 && y0==y1){
+            break; // Fim do Raio
+        }
+        if(mapa->mapa[x0][y0]==0){
+            mapa->mapa[x0][y0] = z;
+        }
+        else if(mapa->mapa[x0][y0]==1){
+            break; // Fim do Raio - Sem visao a partir desse ponto
+        }
+        if(mapa->mapa[x0][y0]!=z & (mapa->mapa[x0][y0]==v*1 || mapa->mapa[x0][y0]==v*2 || mapa->mapa[x0][y0]==v*3 || mapa->mapa[x0][y0]==v*4 ||mapa->mapa[x0][y0]==v*5 ||mapa->mapa[x0][y0]==v*6 ||mapa->mapa[x0][y0]==v*7 ||mapa->mapa[x0][y0]==v*8)){
+            mapa->mapa[x0][y0] = mapa->mapa[x0][y0] - 10;
+        }
+
         e2 = err;
         if(e2 >-dx){
             err -= dy; x0 += sx;
@@ -627,15 +703,16 @@ Path * aStar(Ponto inicio, Ponto objetivo, Mapa *mapa){
 }
 
 /*
-    Funcao Principal
+    Funcao de Controle
 */
-int main(){
+int robot(){
     // M1
     Mapa *mapa = initMapa();
     if(mapa == NULL) return 0;
     Visibilidade *visibilidade = initVisibilidade();
     processamentoVisibilidade(mapa, visibilidade);
     printGuardas(visibilidade);
+
     // M2
     ListaPath * listaPath = initListaPath(visibilidade, mapa);
 
@@ -643,8 +720,8 @@ int main(){
     setPath(mapa, listaPath);
     setGuardas(mapa, visibilidade);
     printMapa(mapa);
-    exportaMapa(mapa);
-    
+    exportaMapaPlot(mapa);
+
     // Libera
     liberaMapa(mapa);
     liberaVisibilidade(visibilidade);
@@ -652,4 +729,31 @@ int main(){
 
     // 0
     return 0;
+}
+
+/*
+    SIMULACAO - Plot
+*/
+int plot(){
+    Mapa *mapa = initMapa();
+    if(mapa == NULL) return 0;
+    Visibilidade *visibilidade = initVisibilidade();
+    processamentoVisibilidadePlot(mapa, visibilidade); // FUNCAO MODIFICADA PARA FAZER SOMBREAMENTO NO PLOT
+    ListaPath * listaPath = initListaPath(visibilidade, mapa);
+    // export
+    setPath(mapa, listaPath);
+    setGuardas(mapa, visibilidade);
+    exportaMapaPlot(mapa);
+    // free
+    liberaMapa(mapa);
+    liberaVisibilidade(visibilidade);
+    liberaListaPath(listaPath);
+    return 0;
+}
+
+/*
+    Funcao principal
+*/
+int main(){
+    robot();
 }
