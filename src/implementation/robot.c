@@ -166,19 +166,27 @@ ListaPath * initListaPath(Visibilidade *visibilidade, Mapa *mapa){
     ListaPath * listaPath = (ListaPath*)calloc(1, sizeof(ListaPath));
     listaPath->tamanho = visibilidade->quantidade-1;
     listaPath->paths = (Path*)calloc(listaPath->tamanho, sizeof(Path));
+    listaPath->pathsAux = (Path*)calloc(visibilidade->quantidade, sizeof(Path));
     Path *path, *pathOtimo;
-    int i, j, index;
+    int i, j, k, index/*, indexAux*/;
     Ponto aux;
     float menorCusto;
     // Loop para cada ponto
     for(i=0; i<visibilidade->quantidade-1; i++){
         menorCusto = MAXCUSTO;
+        pathOtimo = NULL;
         for(j=i+1; j<visibilidade->quantidade; j++){
-            path = aStar(visibilidade->pontos[i], visibilidade->pontos[j], mapa);
+            path = aStar(visibilidade->pontos[i], visibilidade->pontos[j], mapa); 
             if(path->custo < menorCusto){
+                if(pathOtimo){
+                    liberaPath(pathOtimo);
+                }
                 pathOtimo = path;
                 index = j;
                 menorCusto = path->custo;
+            }
+            else{
+                liberaPath(path);
             }
         }
         listaPath->paths[i] = *pathOtimo;
