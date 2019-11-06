@@ -1,5 +1,5 @@
-/** \addtogroup DCMotorWDriver
- *  @{
+/** 
+ *  PONTE H L298N
  */
 
 #ifndef _DCMDRIVERL298_H_
@@ -25,4 +25,6 @@ class DCMDriverL298
 };
 
 #endif // _DCMDRIVERL298_H_
-/** @}*/
+/* 
+ *
+*/
