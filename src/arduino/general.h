@@ -1,4 +1,5 @@
-#pragma once
+#pragma once // garantia que header sera chamado somente uma vez
+
 /*
 
     Declaracao de estruturas
