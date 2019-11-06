@@ -834,6 +834,12 @@ void percorrePath(Robot *robot, Mapa *mapa, ListaPath *listaPath){
 */
 void moveFrente(Robot *robot){
     /* Acionar Motores e andar um bloco */
+    // 2WD -> Frente
+    dcMotorDriverL298.setMotorA(255,1);
+    dcMotorDriverL298.setMotorB(255,0);
+    delay(200); // 10 cm
+    //Stop both motors
+    dcMotorDriverL298.stopMotors();
     return;
 }
 
@@ -850,7 +856,12 @@ void moveTras(Robot *robot){
 */
 void rotacionaHorario(Robot *robot, int quantidade){
     /* rotaciona n=quantidade vezes */
-    /* ativar APENAS o motor *DIREITO* */
+    /* ativar APENAS o motor *esquerdo*/
+    // MOTOR ESQUERDO - MOVE PRA FRENTE
+    dcMotorDriverL298.setMotorB(255, 0);
+    delay(400); // 1 transicao - horario
+    
+    dcMotorDriverL298.stopMotors();
 } 
 
 /*
@@ -858,7 +869,11 @@ void rotacionaHorario(Robot *robot, int quantidade){
 */
 void rotacionaAntihorario(Robot *robot, int quantidade){
     /* rotaciona n=quantidade vezes */
-    /* ativar APENAS o motor *ESQUERDO* */
+    /* ativar APENAS o motor *DIREITO* */
+    // MOTOR DIREITO - MOVE PRA FRENTE
+    dcMotorDriverL298.setMotorA(255,1);
+    delay(400); // 1 transicao - antihorario
+    dcMotorDriverL298.stopMotors();
 }
 
 /* Setup - Pre Processamento */
@@ -868,7 +883,7 @@ void setup() {
     Serial.begin(9600);
     
     while (!Serial); /* Aguardar pela porta serial */
-    /*
+ 
     Serial.println("Inicio");
     
     // Definicao do Pin do Micro SD
@@ -909,31 +924,6 @@ void setup() {
     liberaListaPath(listaPath);
     liberaRobot(robot);
     }
-                    */
-
-    
-    // MOTOR DIREITO - MOVE PRA FRENTE
-    dcMotorDriverL298.setMotorA(255,1);
-    delay(400); // 1 transicao - antihorario
-
-    dcMotorDriverL298.stopMotors();
-
-    delay(1000);
-    // MOTOR ESQUERDO - MOVE PRA FRENTE
-    dcMotorDriverL298.setMotorB(255, 0);
-    delay(400); // 1 transicao - horario
-    
-    dcMotorDriverL298.stopMotors();
-    
-    /*
-    // 2WD -> Frente
-    dcMotorDriverL298.setMotorA(255,1);
-    dcMotorDriverL298.setMotorB(255,0);
-    delay(200); // 10 cm
-    //Stop both motors
-    dcMotorDriverL298.stopMotors();
-    */
-    
     Serial.println("- - - - - - - - - - - - - - FIM - - - - - - - - - - - - - - ");
 }
 
