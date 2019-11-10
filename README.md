@@ -11,12 +11,12 @@ A primeira tarefa da IA é definir os pontos de guarda no mapa, para isto, utili
 #### Path-Planning
 Uma vez que temos os pontos de guarda necessários para total visibilidade, é necessário estabelecer as rotas entre estes pontos, porém, não podemos simplesmente traças estas rotas sem levar em conta as distâncias entre os mesmos, então planejamos as rotas entre os pontos de guarda X e 1, X e 2 ... X e N, até que encontremos o ponto com caminho mais próximo de X, repetindo esta etapa até planejarmos todas as rotas, de tal meneira, teremos a MENOR ROTA POSSÍVEL para visitar os pontos de guarda.
 
-<img src="/img/astar.gif" width="500" height="500">
+<img src="/img/astar.gif" width="100%" height="auto">
 
 ## Visibilidade + A Star
 Dado um mapa simulado e com nosso sistema de IA rodando, podemos visualizar os pontos de guarda e os caminhos entre eles:
 
-<img src="/img/astarPadronizado.png" width="500" height="500">
+<img src="/img/astarPadronizado.png" width="100%" height="auto">
 
 #### Machine Learning - Future Works @ToDo
 Com os pontos de guarda e as rotas estabelecidas, a tarefa restante é verificar se a bola vermelha está ao alcance do Robô. Com a ferramenta OpenCV, detectamos apenas os pixels vermelhos das imagens e depois verificamos se estes pixels configuram um círculo.
