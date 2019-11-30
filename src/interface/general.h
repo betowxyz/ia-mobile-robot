@@ -29,7 +29,7 @@ typedef struct{
 }Visibilidade;
 
 /*
-Node: utilizada para armazenar valores referentes a cada No no algoritmo A Star
+    Node: utilizada para armazenar valores referentes a cada No no algoritmo A Star
 */
 typedef struct _Node{
     float g, h, f;
@@ -79,7 +79,7 @@ struct HeapStruct{
 */
 
 /*
-INICIALIZACAO
+    INICIALIZACAO
 */
 Ponto initPonto(int x, int y); // Inicializacao da estrutura PONTO
 Mapa * initMapa(); // Inicializacao da estrutura MAPA com leitura do arquivo externo "inputMap.txt"
