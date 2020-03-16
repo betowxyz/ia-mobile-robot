@@ -1,32 +1,20 @@
-/**
-    robotAutomation.c
-    @author: Roberto Marinheiro
-    @version: 6.1 12/09/19
-    Purpose: Sistema de Veiculo Autonomo, dado um Mapa e a localizacao inicial do robo,
-    definir os pontos tais que, se o robo visitar todos estes, ele tera visibilidade total do Mapa
-*/
+/*
+ * INCLUDE
+ */
+extern "C"{
+  #include <stdlib.h>
+  #include <stdio.h>
+  #include <string.h>
+  #include <math.h>
+  #include <stdbool.h>
+  #include "C:\\Users\\Beto\\Desktop\\Projetos\\MobileRobot\\CODE\\V4\\src\\interface\\general.h"
+  #include "C:\\Users\\Beto\\Desktop\\Projetos\\MobileRobot\\CODE\\V4\\src\\interface\\pathPlanning.h"
+  #include "C:\\Users\\Beto\\Desktop\\Projetos\\MobileRobot\\CODE\\V4\\src\\interface\\visibilidade.h"
+};
 
 /*
-    INCLUDE
-*/
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <stdbool.h>
-
-/*
-    HEADERS
-*/
-#include "../interface/general.h" // M0 - General
-#include "../interface/visibilidade.h" // M1 - Visibilidade
-#include "../interface/pathPlanning.h" // M2 - Path Planning
-#include "../interface/robot.h" // MX - Robot Navigation System
-
-/*
-    CONSTANTES DE CONTROLE
-*/
-
+ * DEFINE
+ */
 // Guardas
 #define MAXGUARDA (100000)
 // Ordenacao dos pontos de guarda
@@ -37,6 +25,11 @@
 #define MAXHEAPSIZE (100000)
 // ClosedList
 #define MAXCLOSEDLIST (100000)
+
+/*
+ * IMPLEMENTATION OF FUNCTIONS
+ */
+extern "C"{
 
 /*
 INICIALIZACAO DE ESTRUTURAS
@@ -56,7 +49,7 @@ Ponto initPonto(int x, int y){
     Inicializa a estrutura mapa lendo o arquivo externo "inputMap.txt"
 */
 Mapa * initMapa(){
-    int i, a, aa;
+    int i; //a, aa;
     Mapa *mapa=(Mapa*)calloc(1,sizeof(Mapa));
     Ponto ponto;
     // FORMATO DE LEITURA:
@@ -64,28 +57,33 @@ Mapa * initMapa(){
         // LARGURA
         // MAPA
         // PONTO DE INICIO
-    FILE *file = fopen("../input/mapa90x90_1.txt","r");
-    if(file == NULL){
-        printf("\nErro abrindo arquivo de entrada do mapa...");
-        return NULL;
-    }
+    //FILE *file = fopen("../input/mapa90x90_1.txt","r");
+    //if(file == NULL){
+    //    printf("\nErro abrindo arquivo de entrada do mapa...");
+    //    return NULL;
+    //}
     // Recebendo Altura e Largura
-    fscanf(file,"%d", &mapa->altura);
-    fscanf(file,"%d", &mapa->largura);
+    //fscanf(file,"%d", &mapa->altura);
+    //fscanf(file,"%d", &mapa->largura);
+    mapa->altura = 90;
+    mapa->largura = 90;
     // Alocando
     mapa->mapa=(int**)calloc(mapa->altura, sizeof(int*));
     for(i; i<mapa->altura; i++){
         mapa->mapa[i] = (int*)calloc(mapa->largura ,sizeof(int));
     }
+    
     // Recebendo valores do mapa
-    for(a = 0; a < mapa->altura; a++){
-        for(aa = 0; aa < mapa->largura; aa++){
-            fscanf(file,"%d", &mapa->mapa[a][aa]);
-        }
-    }
-    fscanf(file,"%d %d", &ponto.x, &ponto.y);
+    //for(a = 0; a < mapa->altura; a++){
+    //    for(aa = 0; aa < mapa->largura; aa++){
+    //        fscanf(file,"%d", &mapa->mapa[a][aa]);
+    //    }
+    //}
+    //fscanf(file,"%d %d", &ponto.x, &ponto.y);
+    ponto.x = 1;
+    ponto.y = 1;
     mapa->inicio = ponto;
-    fclose(file);
+    //fclose(file);
     return mapa;
 }
 
@@ -138,7 +136,6 @@ Node * initNodePointer(Node node){
     nodePointer->parente = node.parente;
     return nodePointer;
 }
-
 /*
     Inicializa a estrutrua closedList
 */
@@ -168,27 +165,19 @@ ListaPath * initListaPath(Visibilidade *visibilidade, Mapa *mapa){
     ListaPath * listaPath = (ListaPath*)calloc(1, sizeof(ListaPath));
     listaPath->tamanho = visibilidade->quantidade-1;
     listaPath->paths = (Path*)calloc(listaPath->tamanho, sizeof(Path));
-    listaPath->pathsAux = (Path*)calloc(visibilidade->quantidade, sizeof(Path));
     Path *path, *pathOtimo;
-    int i, j, k, index;
+    int i, j, index;
     Ponto aux;
     float menorCusto;
     // Loop para cada ponto
     for(i=0; i<visibilidade->quantidade-1; i++){
         menorCusto = MAXCUSTO;
-        pathOtimo = NULL;
         for(j=i+1; j<visibilidade->quantidade; j++){
             path = aStar(visibilidade->pontos[i], visibilidade->pontos[j], mapa);
             if(path->custo < menorCusto){
-                if(pathOtimo){
-                    liberaPath(pathOtimo);
-                }
                 pathOtimo = path;
                 index = j;
                 menorCusto = path->custo;
-            }
-            else{
-                liberaPath(path);
             }
         }
         listaPath->paths[i] = *pathOtimo;
@@ -213,33 +202,6 @@ PriorityQueue initMaxHeap() {
     return H;
 }
 
-/*
-    Robot Initialization
-*/
-Robot * initRobot(){
-    /*
-        Formato de Leitura:
-            x y = (X, Y) (ponto de inicio)
-            d = direcao (0->NO, 1->N, 2->NE, 3->L, 4->SE, 5->S, 6->SO, 7->O)
-            l = largura
-            c = comprimento
-    */
-    int x, y;
-    Robot * robot = (Robot*)calloc(1, sizeof(Robot));
-    FILE *file = fopen("../input/robot.txt","r");
-    if(file == NULL){
-        printf("\nErro abrindo arquivo de entrada do mapa...");
-        return NULL;
-    }
-    fscanf(file,"%d %d", &x, &y);
-    Ponto inicio = initPonto(x, y);
-    robot->inicio = inicio;
-    robot->atual = inicio;
-    fscanf(file,"%d", &robot->direcao);
-    fscanf(file,"%f", &robot->largura);
-    fscanf(file,"%f", &robot->comprimento);
-    return robot;
-}
 // FUNCOES GRAFICAS
 
 /*
@@ -253,13 +215,12 @@ void printMapa(Mapa *mapa){
         for(aa=0; aa<mapa->largura; aa++){
             if(mapa->mapa[a][aa]==2) printf(" -"); // LIVRE - COM VISAO
             else if(mapa->mapa[a][aa]==-5) printf(" o"); // LIVRE - PARTE DA ROTA
-            else if(mapa->mapa[a][aa]==-9) printf(" ~"); // LIVRE - PARTE DA ROTA
             else if(mapa->mapa[a][aa]==1) printf(" #"); // CHEIO - OBSTACULO
             else if(mapa->mapa[a][aa]==0) printf("  "); // LIVRE - SEM VISAO
             else if(mapa->mapa[a][aa]>9) printf(" %d", mapa->mapa[a][aa]-10); // LIVRE - PONTO DE GAURDA
         }
     }
-    // printf("\n\nLegenda: \n' ' = Sem visao (Livre)\n'#' = Obstaculo\n'-' = Com Visao (Livre)\n'0-N' = Guarda (Livre)\n'o' = Rota (Livre)\n");
+    printf("\n\nLegenda: \n' ' = Sem visao (Livre)\n'#' = Obstaculo\n'-' = Com Visao (Livre)\n'0-N' = Guarda (Livre)\n'o' = Rota (Livre)\n");
 }
 
 /*
@@ -308,41 +269,6 @@ void printPonto(Ponto ponto){
     printf("\n(%d, %d)", ponto.x, ponto.y);
 }
 
-/*
-    Printa direcao correspondente ao numero
-*/
-void printDirecao(int direcao){
-    switch(direcao){
-    case 0:
-        printf("NO");
-        break;
-    case 1:
-        printf("N");
-        break;
-    case 2:
-        printf("NE");
-        break;
-    case 3:
-        printf("L");
-        break;
-    case 4:
-        printf("SE");
-        break;
-    case 5:
-        printf("S");
-        break;
-    case 6:
-        printf("SO");
-        break;
-    case 7:
-        printf("O");
-        break;
-    default:
-        printf("\nError.");
-        break;
-    }
-}
-
 // FUNCOES GERAIS
 
 /*
@@ -383,6 +309,29 @@ Ponto catchNext(Mapa *mapa){
     proximo.x = -1;
     proximo.y = -1;
     return proximo;
+}
+
+/*
+    Exporta mapa para arquivo externo output.txt (Formato numpy)
+*/
+void exportaMapa(Mapa *mapa){
+    FILE *f = fopen("../output/output.txt", "r+");
+    int a, aa, numeroGuarda;
+    if (f == NULL){
+        printf("Error opening file!\n");
+        exit(1);
+    }
+    for(a=0; a<mapa->altura; a++){
+        for(aa=0; aa<mapa->largura; aa++){
+            if(mapa->mapa[a][aa]==2) fputs(" -", f); // LIVRE - COM VISAO
+            else if(mapa->mapa[a][aa]==-5) fputs(" o", f); // LIVRE - PARTE DA ROTA
+            else if(mapa->mapa[a][aa]==1) fputs(" #", f); // CHEIO - OBSTACULO
+            else if(mapa->mapa[a][aa]==0) fputs("  ", f); // LIVRE - SEM VISAO
+            else if(mapa->mapa[a][aa]>9) fprintf(f, " %d", mapa->mapa[a][aa]-10); // LIVRE - PONTO DE GAURDA
+        }
+    fputs("\n", f);
+    }
+    fclose(f);
 }
 
 /*
@@ -488,8 +437,7 @@ void liberaVisibilidade(Visibilidade *visibilidade){
     Liberamento de memoria utilizada pela estrutura ClosedList
 */
 void liberaClosedList(ClosedList *closedList){
-    int i;
-    for(i=0; i<closedList->tamanho; i++){
+    for(int i=0; i<closedList->tamanho; i++){
         if(closedList->nodes[i].parente){
             free(closedList->nodes[i].parente);
         }
@@ -502,8 +450,7 @@ void liberaClosedList(ClosedList *closedList){
     Libera memoria alocada para LISTAPATH
 */
 void liberaListaPath(ListaPath *listaPath){
-    int i;
-    for(i=0; i<listaPath->tamanho; i++){
+    for(int i=0; i<listaPath->tamanho; i++){
         free(listaPath->paths[i].path);
         }
     free(listaPath->paths);
@@ -514,8 +461,7 @@ void liberaListaPath(ListaPath *listaPath){
     Liberamento de Memoria da MaxHeap
 */
 void liberaMaxHeap(PriorityQueue H) {
-    int i;
-    for(i=0; i<H->tamanho; i++){
+    for(int i=0; i<H->tamanho; i++){
         if(H->Elements[i].parente){
             free(H->Elements[i].parente);
         }
@@ -525,27 +471,11 @@ void liberaMaxHeap(PriorityQueue H) {
 }
 
 /*
-    Libera memoria alocada pela estrutura Robot
-*/
-void liberaRobot(Robot *robot){
-    free(robot);
-}
-
-/*
-    Libera memoria alocada pela estrutura Path
-*/
-void liberaPath(Path *path){
-    free(path->path);
-    free(path);
-}
-
-/*
     M1 VISIBILIDADE
 */
 
 /*
-    Faz o processamento da visibilidade disparando raio para todas as direcoes (360)..
-    .. e selecionando novos pontos de guarda
+    Faz o processamento da visibilidade disparando raio para todas as direcoes e selecionando novos pontos de guarda
 */
 int processamentoVisibilidade(Mapa *mapa, Visibilidade *visibilidade){
     int i, j;
@@ -596,11 +526,13 @@ int processamentoVisibilidadePlot(Mapa *mapa, Visibilidade *visibilidade){
 /*
     Cria o raio a ser disparado para verificar a visibilidade
 */
-void raio(int x0, int y0, int x1, int y1, Mapa *mapa) { // ~BRESENHAMS LINE ALGORITHM~
+void raio(int x0, int y0, int x1, int y1, Mapa *mapa) { // ~BRESEHANS LINE ALGORITHM~
     int dx = abs(x1-x0), sx = x0<x1 ? 1 : -1;
     int dy = abs(y1-y0), sy = y0<y1 ? 1 : -1;
     int err = (dx>dy ? dx : -dy)/2, e2;
+    int dist=0;
     for(;;){
+        dist++; // Podemos usar esse dist
         if(x0==x1 && y0==y1){
             break; // Fim do Raio
         }
@@ -643,6 +575,7 @@ void raioPlot(int x0, int y0, int x1, int y1, Mapa *mapa, int z) { // ~BRESEHANS
         if(mapa->mapa[x0][y0]!=z & (mapa->mapa[x0][y0]==v*1 || mapa->mapa[x0][y0]==v*2 || mapa->mapa[x0][y0]==v*3 || mapa->mapa[x0][y0]==v*4 ||mapa->mapa[x0][y0]==v*5 ||mapa->mapa[x0][y0]==v*6 ||mapa->mapa[x0][y0]==v*7 ||mapa->mapa[x0][y0]==v*8)){
             mapa->mapa[x0][y0] = mapa->mapa[x0][y0] - 10;
         }
+
         e2 = err;
         if(e2 >-dx){
             err -= dy; x0 += sx;
@@ -765,196 +698,20 @@ Path * aStar(Ponto inicio, Ponto objetivo, Mapa *mapa){
     return path;
 }
 
-/*
-    Robot System
-*/
-
-/*
-    Calcula a direcao que o robot tem de seguir para chegar de um ponto a, a um ponto b
-*/
-int calculaDirecao(Ponto pontoInicial, Ponto pontoProximo){
-    int xdif = 0, ydif = 0;
-    xdif = pontoProximo.x - pontoInicial.x;
-    xdif = pontoProximo.y - pontoInicial.y;
-    printf("\nXDIF (%d) - YDIF (%d)", xdif, ydif);
-    // pontoInicial == pontoProximo
-    if(xdif == 0 && ydif == 0){
-        return 42;
-    }
-    // NOROESTE (-1, -1)
-    else if(xdif == -1 && ydif == -1){
-        return 0;
-    }
-    // NORTE (-1, 0)
-    else if(xdif == -1 && ydif == 0){
-        return 1;
-    }
-    // NORDESTE (-1, 1)
-    else if(xdif == -1 && ydif == 1){
-        return 2;
-    }
-    // LESTE (0, 1)
-    else if(xdif == 0 && ydif == 1){
-        return 3;
-    }
-    // SUDESTE (1, 1)
-    else if(xdif == 1 && ydif == 1){ 
-        return 4;
-    }
-    // S (1, 0)
-    else if(xdif == 1 && ydif == 0){
-        return 5;
-    }
-    // SO (1, -1)
-    else if(xdif == 1 && ydif == -1){
-        return 6;
-    }
-    // O (0, -1)
-    else if(xdif == 0 && ydif == -1){
-        return 7;
-    }
-    // Erro
-    else{
-        return -1;
-    }
 }
 
 /*
-    Rotaciona o Robot para a direcao corrta
-*/
-void rotaciona(Robot *robot, Ponto proximoPonto, int novaDirecao){
-    int direcaoAux = 0, rotacaoHoraria  = 0, rotacaoAntiHoraria = 0;
-    // 0->NO, 1->N, 2->NE, 3->L, 4->SE, 5->S, 6->SO, 7->O
-    // Se o Robot ja esta na direcao correta, nao rotacionamos
-    if(robot->direcao == novaDirecao){
-        return;
-    }
-    // Tentativa de Rotacao Sentido Horario
-    for(int i=0; i<5; i++){
-        direcaoAux = robot->direcao + i;
-        if(direcaoAux >7){
-            direcaoAux -= 8;
-        }
-        if(direcaoAux == novaDirecao){
-            rotacaoHoraria = i;
-        }
-    }
-    // Tentativa de Rotacao Sentido Antihorario
-    for(int j=0; j<4; j++){
-        direcaoAux = robot->direcao - j;
-        if(direcaoAux < 0){
-            direcaoAux += 8;
-        }
-        if(direcaoAux == novaDirecao){
-            rotacaoAntiHoraria = j;
-        }
-    }
-    // Rotacionar o menor possivel
-    if(rotacaoAntiHoraria < rotacaoHoraria){
-        // Rotacionar N=rotacaoAntiHoraria vezes de maneira AntiHoraria
-        rotacionaAntihorario(robot, rotacaoAntiHoraria);
-        printf("\nRotacao horaria: qtd: (%d) - direcao atual (", rotacaoAntiHoraria);
-        printDirecao(robot->direcao);
-        printf(") - direcao nova (");
-        printDirecao(novaDirecao);
-        printf(")");
-        robot->direcao = novaDirecao;
-        return;
-    }else{
-        // Rotacioanr N=rotacaoHoraria vezes de maneira Horaria
-        rotacionaHorario(robot, rotacaoHoraria);
-        printf("\nRotacao antihoraria: qtd: (%d) - direcao atual (", rotacaoAntiHoraria);
-        printDirecao(robot->direcao);
-        printf(") - direcao nova (");
-        printDirecao(novaDirecao);
-        printf(")");
-        robot->direcao = novaDirecao;
-        return;
-    }
+ * SETUP - PRE PROCESSAMENTO
+ */
+void setup() {
+  Mapa * mapa = initMapa();
+  printMapa(mapa);
+  liberaMapa(mapa);
 }
 
 /*
-    Percorre os caminhos
-*/
-void percorrePath(Robot *robot, Mapa *mapa, ListaPath *listaPath){
-    // Robot deve caminhar de ponto a ponto rotacionando quando necessario
-    int novaDirecao = 0;
-    for(int i=0; i<listaPath->tamanho; i++){
-        printf("\nMovimentacao da Rota %d (custo: %f):\n", i, listaPath->paths[i].custo);
-        for(int j = listaPath->paths[i].tamanho-1; j>=0; j--){
-            printf("\nPonto incial: (%d, %d), Ponto destino: (%d, %d)", robot->atual.x, robot->atual.y, listaPath->paths[i].path[j].x, listaPath->paths[i].path[j].y);
-            novaDirecao = calculaDirecao(robot->atual, listaPath->paths[i].path[j]);
-            if(novaDirecao == 42) continue; // pontoInicial == pontoProximo
-            rotaciona(robot, listaPath->paths[i].path[j], novaDirecao);
-            moveFrente(robot);
-            printf("\nDirecao atual do robo:(");
-            printDirecao(robot->direcao);
-            printf(")");
-            robot->atual = listaPath->paths[i].path[j];
-            mapa->mapa[robot->atual.x][robot->atual.y] = -9;
-        }
-    }
-}
-
-/*
-    Move o Robot para frente
-*/
-void moveFrente(Robot *robot){
-    // Acionar Motores e andar um bloco
-    return;
-}
-
-/*
-    Move o Robot para tras
-*/
-void moveTras(Robot *robot){
-    // Acionar Motores e andar um bloco
-    return;
-}
-
-/*
-    Rotaciona na direcao horaria
-*/
-void rotacionaHorario(Robot *robot, int quantidade){
-    // rotaciona n=quantidade vezes
-    // ativar APENAS o motor *DIREITO*
-}
-
-/*
-    Rotaciona na direcao antihoraria
-*/
-void rotacionaAntihorario(Robot *robot, int quantidade){
-    // rotaciona n=quantidade vezes
-    // ativar APENAS o motor *ESQUERDO*
-}
-
-/*
-    Funcao de Controle
-*/
-int main(){
-    // M1
-    Mapa *mapa = initMapa();
-    if(mapa == NULL) return 0;
-    Visibilidade *visibilidade = initVisibilidade();
-    processamentoVisibilidade(mapa, visibilidade);
-
-    // M2
-    ListaPath * listaPath = initListaPath(visibilidade, mapa);
-
-    // Grafica
-    setPath(mapa, listaPath);
-    setGuardas(mapa, visibilidade);
-    printMapa(mapa);
-
-    // Robot Sys
-    Robot *robot = initRobot();
-    percorrePath(robot, mapa, listaPath);
-
-    // Libera
-    liberaMapa(mapa);
-    liberaVisibilidade(visibilidade);
-    liberaListaPath(listaPath);
-    liberaRobot(robot);
-    // 0
-    return 0;
+ * LOOP - CONTROLE
+ */
+void loop() {
+  // put your main code here, to run repeatedly:
 }

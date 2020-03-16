@@ -29,7 +29,7 @@ typedef struct{
 }Visibilidade;
 
 /*
-    Node: utilizada para armazenar valores referentes a cada No no algoritmo A Star
+Node: utilizada para armazenar valores referentes a cada No no algoritmo A Star
 */
 typedef struct _Node{
     float g, h, f;
@@ -58,7 +58,7 @@ typedef struct{
     ListaPath: armazeana os Paths produzidos pelo A Star
 */
 typedef struct{
-    Path *paths;
+    Path *paths, *pathsAux;
     int tamanho;
 }ListaPath;
 
@@ -73,13 +73,26 @@ struct HeapStruct{
 };
 
 /*
+    Robot: variaveis de controle do robo
+    Direcoes:
+    NO(0)   N(1)    NE(2)
+    O(7)    *       L(3)
+    SO(6)   S(5)   SE(4)
+*/
+typedef struct{
+    Ponto inicio, atual;
+    int direcao;
+    float comprimento, largura;
+}Robot;
+
+/*
 
     Definicao das funcoes
 
 */
 
 /*
-    INICIALIZACAO
+INICIALIZACAO
 */
 Ponto initPonto(int x, int y); // Inicializacao da estrutura PONTO
 Mapa * initMapa(); // Inicializacao da estrutura MAPA com leitura do arquivo externo "inputMap.txt"
@@ -91,6 +104,7 @@ ClosedList * initClosedList(); // Inicializacao da estrutura CLOSEDLIST
 Path * initPath(); // Inicializacao da estrutura PATH
 ListaPath * initListaPath(Visibilidade *visibilidade, Mapa *mapa); // Inicializa a estrutura LISTA PATH e planeja repetidamente as rotas entre PN e proximo ponto mais proximo
 PriorityQueue initMaxHeap(); // Inicializacao da estrutura MAXHEAP
+Robot * initRobot(); // Initialize Robot
 
 /*
     GRAFICA
@@ -100,14 +114,14 @@ void printMapaAbsoluto(Mapa *mapa); // Printa o mapa - Valores absolutos
 void printGuardas(Visibilidade *visibilidade); // Printa os pontos necessarios para total visibiliade
 void printListaPath(ListaPath *listaPath); // Printa as rotas geradas pelo PlanejamentoMestre & AStar
 void printPonto(Ponto ponto); // Printa coordenadas do ponto
+void printDirecao(int direcao); // Printa direcao correspondente ao numero
 
-/* 
+/*
     GERAL
 */
 void setGuardas(Mapa *mapa, Visibilidade *visibilidade); // Posiciona os guardas no mapa como "8"
 void setPath(Mapa *mapa, ListaPath *listaPath); // Posiciona os pontos de ROTA no mapa
 Ponto catchNext(Mapa *mapa); // Pesquisa pelo proximo ponto sem visibilidade do Robo
-void exportaMapa(Mapa *mapa); // Exporta Mapa para arquivo externo com valores para plot
 
 /*
     ESTRUTURAIS
@@ -127,3 +141,5 @@ void liberaVisibilidade(Visibilidade *visibilidade); // Libera memoria armazenad
 void liberaClosedList(ClosedList *closedList); // Libera memoria armazenada pela estrutura ClosedList
 void liberaListaPath(ListaPath *path); // Libera memoria armazenada pela estrutura LISTAPATH
 void liberaMaxHeap(PriorityQueue H); // Libera memoria armazenada pela estrutura MAXHEAP
+void liberaRobot(Robot *robot); // Libera memoria alocada pela estrutura Robot
+void liberaPath(Path *path); // Libera memoria alocada pela estrutura Path
